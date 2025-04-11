@@ -287,22 +287,12 @@
             display: none;
         }
 
-        /* Overlay для кулдауна */
-        .cooldown-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 101;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #fff;
-            font-size: 2em;
+        /* Стиль для таймера кулдауна */
+        #cooldownTimerDisplay {
+            font-size: 1.2em;
+            color: #f1c40f;
             text-align: center;
-            display: none; /* Скрываем по умолчанию */
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -327,6 +317,10 @@
     </div>
 
     <button id="openCaseButton" onclick="openCase()" disabled>Открыть кейс</button>
+
+    <!-- Таймер кулдауна -->
+    <div id="cooldownTimerDisplay"></div>
+
     <div id="result"></div>
     <div id="instructions">Нажмите "Открыть кейс", чтобы испытать удачу!</div>
     <div id="bot-link"><a href="https://t.me/mixvinebot" target="_blank">Связаться с ботом MixVine</a></div>
@@ -338,14 +332,6 @@
             <h2 id="winItemTitle"></h2>
             <p class="modal-instruction">Заскринь экран и скинь его телеграм боту</p>
             <a href="https://t.me/mixvinebot" target="_blank" class="modal-bot-button">Перейти к боту</a>
-        </div>
-    </div>
-
-     <!-- Оверлей для кулдауна -->
-    <div class="cooldown-overlay" id="cooldownOverlay">
-        <div>
-            Кейс можно будет открыть снова через:<br>
-            <span id="cooldownTimer"></span>
         </div>
     </div>
 
@@ -379,7 +365,7 @@
             spinsMultiplier: 0.5,
             minSpins: 5,
             maxSpins: 8,
-            cooldownTime: 3600 // 1 hour in seconds
+            cooldownTime: 1800 // 30 minutes in seconds
         };
         // --- КОНЕЦ КОНФИГУРАЦИИ ---
 
@@ -399,15 +385,13 @@
         const winModalCloseButton = document.getElementById('winModalCloseButton');
         const agreementCheckbox = document.getElementById('agreementCheckbox');
         const agreementContainer = document.getElementById('agreementContainer');
-        const cooldownOverlay = document.getElementById('cooldownOverlay');
-        const cooldownTimerDisplay = document.getElementById('cooldownTimer');
+        const cooldownTimerDisplay = document.getElementById('cooldownTimerDisplay');
 
         const numUniqueItems = config.items.length;
 
         let isSpinning = false;
         let itemWidth = 0; // Will be calculated
         let itemsGenerated = false;
-        let hasOpenedOnce = false;
         let nextAvailableTime = null;
 
         // Function to create item elements and calculate width
@@ -495,12 +479,6 @@
 
             if (isSpinning || !itemsGenerated || itemWidth === 0 || nextAvailableTime > Date.now()) {
                 console.warn("Spin prevented: Conditions not met.", {isSpinning, itemsGenerated, itemWidth, nextAvailableTime});
-
-                if(nextAvailableTime > Date.now()) {
-                    showCooldownOverlay();
-                } else if(itemWidth === 0) {
-                    alert("Ошибка: Не удалось определить размеры элементов. Попробуйте обновить страницу.");
-                }
                 return;
             }
 
@@ -571,7 +549,7 @@
             localStorage.setItem('nextAvailableTime', nextAvailableTime);
             openCaseButton.disabled = true;
             openCaseButton.textContent = "Кейс открыт! Подождите...";
-            showCooldownOverlay();
+            updateCooldownTimer();
         }
 
         function checkCooldown() {
@@ -581,29 +559,20 @@
                 if (nextAvailableTime > Date.now()) {
                     openCaseButton.disabled = true;
                      openCaseButton.textContent = "Кейс открыт! Подождите...";
-                    showCooldownOverlay();
+                    updateCooldownTimer();
                 } else {
                     resetButtonState();
                 }
             }
         }
 
-        function showCooldownOverlay() {
-            cooldownOverlay.style.display = "flex";
-            updateCooldownTimer();
-        }
-
-        function hideCooldownOverlay() {
-            cooldownOverlay.style.display = "none";
-        }
 
         function updateCooldownTimer() {
             const timeLeft = nextAvailableTime - Date.now();
             if (timeLeft > 0) {
-                const hours = Math.floor((timeLeft / (1000 * 60 * 60)));
                 const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-                cooldownTimerDisplay.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                cooldownTimerDisplay.textContent = `Следующий кейс будет доступен через: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                 setTimeout(updateCooldownTimer, 1000); // Update every second
             } else {
                 resetButtonState();
@@ -615,7 +584,7 @@
             localStorage.removeItem('nextAvailableTime');
             openCaseButton.disabled = !agreementCheckbox.checked;
             openCaseButton.textContent = "Открыть кейс";
-            hideCooldownOverlay();
+            cooldownTimerDisplay.textContent = ""; // Clear the timer display
         }
 
 
@@ -657,6 +626,7 @@
         window.addEventListener('load', () => {
              if (nextAvailableTime > Date.now()) {
                   openCaseButton.disabled = true; // Если кулдаун, то блокируем
+                   updateCooldownTimer();
              } else {
                   openCaseButton.disabled = !agreementCheckbox.checked;
              }
