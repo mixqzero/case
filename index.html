@@ -286,6 +286,24 @@
         #agreementContainer.hidden {
             display: none;
         }
+
+        /* Overlay для кулдауна */
+        .cooldown-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 101;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-size: 2em;
+            text-align: center;
+            display: none; /* Скрываем по умолчанию */
+        }
     </style>
 </head>
 <body>
@@ -323,6 +341,14 @@
         </div>
     </div>
 
+     <!-- Оверлей для кулдауна -->
+    <div class="cooldown-overlay" id="cooldownOverlay">
+        <div>
+            Кейс можно будет открыть снова через:<br>
+            <span id="cooldownTimer"></span>
+        </div>
+    </div>
+
     <footer>
         <span>© Project MIxVine 2024</span>
         <span class="footer-version">ver. web2Global</span> <!-- Добавлена версия -->
@@ -353,6 +379,7 @@
             spinsMultiplier: 0.5,
             minSpins: 5,
             maxSpins: 8,
+            cooldownTime: 3600 // 1 hour in seconds
         };
         // --- КОНЕЦ КОНФИГУРАЦИИ ---
 
@@ -372,6 +399,8 @@
         const winModalCloseButton = document.getElementById('winModalCloseButton');
         const agreementCheckbox = document.getElementById('agreementCheckbox');
         const agreementContainer = document.getElementById('agreementContainer');
+        const cooldownOverlay = document.getElementById('cooldownOverlay');
+        const cooldownTimerDisplay = document.getElementById('cooldownTimer');
 
         const numUniqueItems = config.items.length;
 
@@ -379,6 +408,7 @@
         let itemWidth = 0; // Will be calculated
         let itemsGenerated = false;
         let hasOpenedOnce = false;
+        let nextAvailableTime = null;
 
         // Function to create item elements and calculate width
         function setupItems() {
@@ -463,13 +493,17 @@
                  }
             }
 
-            if (isSpinning || !itemsGenerated || itemWidth === 0 || hasOpenedOnce) {
-                console.warn("Spin prevented: Conditions not met.", {isSpinning, itemsGenerated, itemWidth, hasOpenedOnce});
-                 if(itemWidth === 0) alert("Ошибка: Не удалось определить размеры элементов. Попробуйте обновить страницу.");
+            if (isSpinning || !itemsGenerated || itemWidth === 0 || nextAvailableTime > Date.now()) {
+                console.warn("Spin prevented: Conditions not met.", {isSpinning, itemsGenerated, itemWidth, nextAvailableTime});
+
+                if(nextAvailableTime > Date.now()) {
+                    showCooldownOverlay();
+                } else if(itemWidth === 0) {
+                    alert("Ошибка: Не удалось определить размеры элементов. Попробуйте обновить страницу.");
+                }
                 return;
             }
 
-            hasOpenedOnce = true;
             isSpinning = true;
             openCaseButton.disabled = true;
             openCaseButton.textContent = "Крутится...";
@@ -514,6 +548,7 @@
                 isSpinning = false;
                 openCaseButton.textContent = "Кейс открыт!";
                 showWinModal(winningItem);
+                startCooldown();
                 console.log("Spin finished.");
             }, duration * 1000);
         }
@@ -530,8 +565,63 @@
             }
         }
 
+        // --- COOLDOWN FUNCTIONS ---
+        function startCooldown() {
+            nextAvailableTime = Date.now() + config.cooldownTime * 1000;
+            localStorage.setItem('nextAvailableTime', nextAvailableTime);
+            openCaseButton.disabled = true;
+            openCaseButton.textContent = "Кейс открыт! Подождите...";
+            showCooldownOverlay();
+        }
+
+        function checkCooldown() {
+            const storedTime = localStorage.getItem('nextAvailableTime');
+            if (storedTime) {
+                nextAvailableTime = parseInt(storedTime, 10);
+                if (nextAvailableTime > Date.now()) {
+                    openCaseButton.disabled = true;
+                     openCaseButton.textContent = "Кейс открыт! Подождите...";
+                    showCooldownOverlay();
+                } else {
+                    resetButtonState();
+                }
+            }
+        }
+
+        function showCooldownOverlay() {
+            cooldownOverlay.style.display = "flex";
+            updateCooldownTimer();
+        }
+
+        function hideCooldownOverlay() {
+            cooldownOverlay.style.display = "none";
+        }
+
+        function updateCooldownTimer() {
+            const timeLeft = nextAvailableTime - Date.now();
+            if (timeLeft > 0) {
+                const hours = Math.floor((timeLeft / (1000 * 60 * 60)));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                cooldownTimerDisplay.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                setTimeout(updateCooldownTimer, 1000); // Update every second
+            } else {
+                resetButtonState();
+            }
+        }
+
+        function resetButtonState() {
+            nextAvailableTime = null;
+            localStorage.removeItem('nextAvailableTime');
+            openCaseButton.disabled = !agreementCheckbox.checked;
+            openCaseButton.textContent = "Открыть кейс";
+            hideCooldownOverlay();
+        }
+
+
         // --- Initialize ---
         setupItems();
+        checkCooldown();
 
         let resizeTimeout;
         window.addEventListener('resize', () => {
@@ -556,24 +646,19 @@
         // Обработчик изменения состояния чекбокса
         agreementCheckbox.addEventListener('change', function() {
             openCaseButton.disabled = !this.checked;
+             if (!this.checked) {
+                 openCaseButton.textContent = "Открыть кейс"; // Возвращаем текст кнопки
+             } else if (nextAvailableTime > Date.now()){
+                  openCaseButton.disabled = true; // Если кулдаун, то блокируем
+             }
         });
 
         // Сразу после загрузки скрипта проверяем, было ли согласие сохранено в localStorage
-         window.addEventListener('load', () => {
-            if (localStorage.getItem('agreementAccepted') === 'true') {
-                agreementCheckbox.checked = true;
-                openCaseButton.disabled = false;
-                agreementContainer.classList.add("hidden");
-            }
-        });
-
-        agreementCheckbox.addEventListener('change', function() {
-             openCaseButton.disabled = !this.checked;
-             // Если согласие дано, сохраняем его в localStorage
-             if (this.checked) {
-                 localStorage.setItem('agreementAccepted', 'true');
+        window.addEventListener('load', () => {
+             if (nextAvailableTime > Date.now()) {
+                  openCaseButton.disabled = true; // Если кулдаун, то блокируем
              } else {
-                 localStorage.removeItem('agreementAccepted');
+                  openCaseButton.disabled = !agreementCheckbox.checked;
              }
          });
 
