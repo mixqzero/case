@@ -267,15 +267,11 @@
         </div>
     </div>
 
-    <!-- Canvas для конфетти -->
-    <canvas id="confetti-canvas"></canvas>
-
     <footer>
         <span>© Project MIxVine 2024</span>
         <span class="footer-version">ver. web2Global</span> <!-- Добавлена версия -->
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/js-confetti@latest/dist/js-confetti.browser.js"></script>
 
     <script>
         // --- КОНФИГУРАЦИЯ ---
@@ -327,8 +323,27 @@
         let itemsGenerated = false;
         let nextAvailableTime = null;
 
+         // Функция для запуска салютов
+        function launchFirework() {
+            const colors = ['#f1c40f', '#e67e22', '#e74c3c', '#9b59b6', '#3498db'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+            confetti({
+                particleCount: 150,
+                angle: 90,
+                spread: 70,
+                startVelocity: 50,
+                decay: 0.9,
+                gravity: 0.6,
+                colors: [randomColor],
+                origin: { x: Math.random(), y: 0.7 } // Случайная позиция по горизонтали
+            });
+        }
+
         // Конфетти
-        const jsConfetti = new JSConfetti({ canvas: 'confetti-canvas' });
+        const confettiSettings = { target: 'confetti-canvas', max: '80' };
+        const confetti = new ConfettiGenerator(confettiSettings);
+        confetti.render();
 
         // Function to create item elements and calculate width
         function setupItems() {
@@ -388,7 +403,17 @@
             if (item.special) {
                 winModalContent.classList.add('special-effect');
                 console.log("Special win effect added for:", item.display);
-                 jsConfetti.addConfetti(); // Запускаем конфетти
+                 confetti.start();
+
+                // Запускаем несколько салютов
+                setTimeout(launchFirework, 100);
+                setTimeout(launchFirework, 500);
+                setTimeout(launchFirework, 1000);
+                setTimeout(launchFirework, 1500);
+
+                setTimeout(function() {
+                    confetti.stop();
+                }, 2000);
             }
 
             winModal.style.display = "block";
@@ -557,7 +582,7 @@
              } else if (nextAvailableTime > Date.now()){
                   openCaseButton.disabled = true; // Если кулдаун, то блокируем
              }
-        });
+         });
 
         // Сразу после загрузки скрипта проверяем, было ли согласие сохранено в localStorage
         window.addEventListener('load', () => {
@@ -570,6 +595,6 @@
          });
 
     </script>
-
+    <script src="https://cdn.jsdelivr.net/npm/confetti-js@0.0.18/dist/index.min.js"></script>
 </body>
 </html>
