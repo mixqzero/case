@@ -208,23 +208,91 @@
             color: rgba(255, 255, 255, 0.4); /* Еще более бледный цвет */
         }
 
+        /* --- АДАПТИВНОСТЬ --- */
+        @media (max-width: 768px) {
+            body { padding: 15px; padding-bottom: 65px; }
+             h1 { font-size: 1.8em; margin-bottom: 20px; }
+            .case-wrapper { max-width: 90vw; margin-bottom: 20px; }
+            .case-container { height: 120px; }
+             .case-item { width: 120px; font-size: 18px; }
+              button#openCaseButton { font-size: 15px; padding: 10px 18px; }
+            .modal-content { max-width: 400px; padding: 15px 20px; }
+            .modal-content h2 { font-size: 1.6em; }
+            .modal-instruction { font-size: 0.95em; margin-bottom: 15px; }
+            .modal-bot-button { font-size: 0.95em; padding: 9px 18px; }
+            footer { font-size: 12px; padding: 8px 0;}
+        }
+        @media (max-width: 480px) {
+             body { padding: 10px; padding-bottom: 60px; }
+             h1 { font-size: 1.5em; margin-bottom: 15px; }
+             .case-wrapper { max-width: 95vw; margin-bottom: 15px; }
+             .case-container { height: 110px; }
+             .case-item { width: 100px; font-size: 15px; } /* Уменьшен размер текста */
+             button#openCaseButton { font-size: 14px; padding: 8px 15px; }
+              #instructions, #bot-link { font-size: 14px; }
+             .modal-content { width: 92%; max-width: 300px; padding: 15px; }
+             .modal-content h2 { font-size: 1.4em; margin-bottom: 10px;}
+             .modal-instruction { font-size: 0.9em; margin-bottom: 15px;}
+             .modal-bot-button { font-size: 0.9em; padding: 8px 15px; }
+             footer { font-size: 11px; padding: 6px 0;}
+             /* Можно добавить еще более мелкий шрифт для спец. итемов если 15px мало */
+             /* .case-item.rare, .case-item.epic, .case-item.legendary { font-size: 13px; } */
+        }
+
+        /* --- Стили для соглашения --- */
+        .agreement-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            justify-content: center; /* Центрирование по горизонтали */
+        }
+
+        #agreementCheckbox {
+            margin-right: 5px;
+        }
+
+        #agreementLabel {
+            font-size: 14px;
+            color: #ddd;
+            user-select: none; /* Предотвращает выделение текста */
+        }
+
+        #agreementLabel a {
+            color: #f1c40f;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        #agreementLabel a:hover {
+            text-decoration: underline;
+        }
+
+        /* Стили для подсказки */
+        button#openCaseButton[disabled]:hover::after {
+            content: 'Необходимо согласиться с Политикой конфиденциальности и Пользовательским соглашением';
+            position: absolute;
+            bottom: -40px; /* Расположение подсказки */
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 1; /* Чтобы подсказка была над другими элементами */
+        }
+
+        #agreementContainer.hidden {
+            display: none;
+        }
+
         /* Стиль для таймера кулдауна */
         #cooldownTimerDisplay {
             font-size: 1.2em;
             color: #f1c40f;
             text-align: center;
             margin-top: 10px;
-        }
-
-        /* Конфетти */
-        #confetti-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none; /* Чтобы не мешать кликам */
-            z-index: 1000; /* Над всем контентом */
         }
     </style>
 </head>
@@ -287,7 +355,10 @@
                 { display: "#9", rarity: "common" }, { display: "#10", rarity: "common" },
                 { display: "#11", rarity: "common" }, { display: "#12", rarity: "common" },
                 { display: "#13", rarity: "common" }, { display: "#14", rarity: "common" },
-                { display: "#15", rarity: "common" }
+                { display: "#15", rarity: "common" }, { display: "#16", rarity: "common" },
+                { display: "#17", rarity: "common" },
+                { display: "#18", rarity: "common" }, { display: "#19", rarity: "common" },
+                { display: "#20", rarity: "common" },
             ],
             numberOfDuplicates: 5,
             spinDurationBase: 5,
@@ -322,28 +393,6 @@
         let itemWidth = 0; // Will be calculated
         let itemsGenerated = false;
         let nextAvailableTime = null;
-
-         // Функция для запуска салютов
-        function launchFirework() {
-            const colors = ['#f1c40f', '#e67e22', '#e74c3c', '#9b59b6', '#3498db'];
-            const randomColor = colors[Math.floor(Math.random() * colors.length)];
-
-            confetti({
-                particleCount: 150,
-                angle: 90,
-                spread: 70,
-                startVelocity: 50,
-                decay: 0.9,
-                gravity: 0.6,
-                colors: [randomColor],
-                origin: { x: Math.random(), y: 0.7 } // Случайная позиция по горизонтали
-            });
-        }
-
-        // Конфетти
-        const confettiSettings = { target: 'confetti-canvas', max: '80' };
-        const confetti = new ConfettiGenerator(confettiSettings);
-        confetti.render();
 
         // Function to create item elements and calculate width
         function setupItems() {
@@ -403,17 +452,6 @@
             if (item.special) {
                 winModalContent.classList.add('special-effect');
                 console.log("Special win effect added for:", item.display);
-                 confetti.start();
-
-                // Запускаем несколько салютов
-                setTimeout(launchFirework, 100);
-                setTimeout(launchFirework, 500);
-                setTimeout(launchFirework, 1000);
-                setTimeout(launchFirework, 1500);
-
-                setTimeout(function() {
-                    confetti.stop();
-                }, 2000);
             }
 
             winModal.style.display = "block";
@@ -582,7 +620,7 @@
              } else if (nextAvailableTime > Date.now()){
                   openCaseButton.disabled = true; // Если кулдаун, то блокируем
              }
-         });
+        });
 
         // Сразу после загрузки скрипта проверяем, было ли согласие сохранено в localStorage
         window.addEventListener('load', () => {
@@ -595,6 +633,6 @@
          });
 
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/confetti-js@0.0.18/dist/index.min.js"></script>
+
 </body>
 </html>
