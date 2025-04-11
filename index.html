@@ -3,28 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MixVine Free Case</title>
+    <title>MixVine Рулетка</title>
     <style>
-        /* Анимация для фона (Фиолетовый <-> Темно-желтый) */
-        @keyframes purpleGoldGradientShift {
+        /* Анимированный фон */
+        @keyframes blueOrangeGradient {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
-
-        /* Анимация для появления модального окна */
-        @keyframes modalFadeIn {
-            from { opacity: 0; transform: translate(-50%, -60%) scale(0.8); }
-            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-        }
-
-        /* Анимация для спецэффекта */
-        @keyframes specialGlow {
-            0% { box-shadow: 0 0 15px 5px rgba(255, 223, 0, 0.5); }
-            50% { box-shadow: 0 0 30px 10px rgba(255, 223, 0, 0.8); }
-            100% { box-shadow: 0 0 15px 5px rgba(255, 223, 0, 0.5); }
-        }
-
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -33,604 +19,333 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            /* Фиолетово-Темно-желтый анимированный фон */
-            background: linear-gradient(-45deg, #8e44ad, #b48a00, #6a1b9a, #c89600); /* Purple / Dark gold tones */
+            background: linear-gradient(-45deg, #3498db, #e67e22, #2980b9, #d35400); /* Синий / Оранжевый */
             background-size: 400% 400%;
-            animation: purpleGoldGradientShift 15s ease infinite;
-            overflow-x: hidden;
+            animation: blueOrangeGradient 15s ease infinite;
             color: #f0f0f0;
+            text-align: center;
             padding: 20px;
             box-sizing: border-box;
-            position: relative;
-            padding-bottom: 75px; /* Увеличено место для 2 строк футера */
+            position: relative; /* Для футера */
         }
 
         h1 {
-            text-align: center;
             color: #fff;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             font-size: 2em;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
         }
 
-        .case-wrapper {
+        #rouletteContainer {
             position: relative;
-            width: 100%;
-            max-width: 80vw;
-            margin-bottom: 25px;
+            width: 200px;
+            height: 200px;
+            margin-bottom: 20px;
         }
 
-        /* Маркеры */
-        .case-marker {
-            position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
-            width: 0; height: 0; border-left: 10px solid transparent;
-            border-right: 10px solid transparent; border-top: 15px solid #fff; z-index: 10;
-        }
-         .case-marker-line {
-            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-            width: 3px; height: 100%; background-color: rgba(255, 255, 255, 0.5);
-            z-index: 5; box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        #rouletteWheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            transition: transform 5s cubic-bezier(0.1, 0.6, 0.1, 1); /* Более плавная анимация */
+            position: relative;
         }
 
-        .case-container {
-            width: 100%;
-            height: 140px;
-            overflow: hidden;
-            white-space: nowrap;
-            background-color: rgba(0, 0, 0, 0.5);
-            border: 2px solid #777;
+        .rouletteSlot {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border: 100px solid transparent; /* Создаем треугольник */
+            border-width: 100px;
+            border-bottom: 0;
+            border-top: 200px solid; /* Цвет */
+            transform-origin: 50% 100%; /* Вращение от нижней точки */
+            clip: rect(0, 200px, 200px, 0); /* Обрезаем лишнее */
+        }
+
+        .rouletteSlot:nth-child(1) { border-top-color: #ecf0f1; transform: rotate(0deg); } /* Слабый */
+        .rouletteSlot:nth-child(2) { border-top-color: #95a5a6; transform: rotate(51.43deg); } /* Обычный */
+        .rouletteSlot:nth-child(3) { border-top-color: #3498db; transform: rotate(102.86deg); } /* Необычный */
+        .rouletteSlot:nth-child(4) { border-top-color: #2ecc71; transform: rotate(154.29deg); } /* Редкий */
+        .rouletteSlot:nth-child(5) { border-top-color: #9b59b6; transform: rotate(205.72deg); } /* Эпический */
+        .rouletteSlot:nth-child(6) { border-top-color: #e74c3c; transform: rotate(257.15deg); } /* Мифический */
+        .rouletteSlot:nth-child(7) { border-top-color: #f1c40f; transform: rotate(308.58deg); } /* Легендарный */
+
+        #rouletteArrow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            margin-top: -15px;
+            margin-left: -10px;
+            border-left: 20px solid #fff; /* Белая стрелка */
+            border-top: 15px solid transparent;
+            border-bottom: 15px solid transparent;
+            z-index: 1; /* Поверх рулетки */
+        }
+
+        #spinButton {
+            background-color: #27ae60;
+            color: #fff;
+            padding: 12px 24px;
+            border: none;
             border-radius: 5px;
-            position: relative;
-        }
-
-        .case-items {
-            display: inline-block;
-            height: 100%;
-            transition: transform 5s cubic-bezier(0.1, 0.6, 0.1, 1);
-        }
-
-        .case-item {
-            display: inline-flex; align-items: center; justify-content: center;
-            width: 140px;
-            height: 100%;
-            border-right: 1px solid #555;
-            text-align: center; font-size: 20px;
-            font-weight: bold; box-sizing: border-box; padding: 0 5px;
-            vertical-align: top; flex-direction: column; color: #e0e0e0;
-            background-color: #333;
-            word-break: break-word; /* Добавлено для переноса текста */
-            line-height: 1.2; /* Слегка уменьшено для компактности при переносе */
-        }
-        /* Rarity colors */
-        .case-item.common { background-color: #444; color: #ccc; }
-        .case-item.rare { background-color: #2980b9; color: #fff; }
-        .case-item.epic { background-color: #8e44ad; color: #fff; }
-        .case-item.legendary {
-            background-image: linear-gradient(45deg, #f1c40f, #f39c12, #e67e22);
-            color: #333; font-weight: bold;
-        }
-
-        button#openCaseButton {
-            background-color: #c89600; color: #333;
-            padding: 10px 20px;
-            border: none; border-radius: 5px; cursor: pointer;
+            cursor: pointer;
             font-size: 16px;
-            font-weight: bold; margin-bottom: 15px;
-            transition: background-color 0.3s ease, transform 0.1s ease;
-            text-shadow: 1px 1px 2px rgba(255,255,255,0.4);
-            position: relative; /* Для позиционирования подсказки */
-        }
-        button#openCaseButton:hover:not(:disabled) { background-color: #b48a00; }
-        button#openCaseButton:active:not(:disabled) { transform: scale(0.98); }
-        button#openCaseButton:disabled {
-            background-color: #666; color: #bbb;
-            cursor: not-allowed; text-shadow: none;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
         }
 
-        #result { display: none; }
-
-        #instructions, #bot-link {
-            font-size: 15px;
-            color: #ddd; text-align: center;
-            max-width: 90%;
-            line-height: 1.4;
-        }
-         #bot-link { margin-top: 5px; }
-        #bot-link a { color: #f1c40f; text-decoration: none; font-weight: bold; }
-         #bot-link a:hover { text-decoration: underline; }
-
-        /* --- МОДАЛЬНОЕ ОКНО --- */
-        .modal {
-            display: none; position: fixed; z-index: 100;
-            left: 0; top: 0; width: 100%; height: 100%;
-            overflow: auto; background-color: rgba(0,0,0,0.7);
+        #spinButton:hover {
+            background-color: #219653;
         }
 
-        .modal-content {
-            position: fixed; top: 50%; left: 50%;
+        #spinButton:disabled {
+            background-color: #7f8c8d;
+            cursor: not-allowed;
+        }
+
+        #resultModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 2;
+        }
+
+        #resultContent {
+            position: absolute;
+            top: 50%;
+            left: 50%;
             transform: translate(-50%, -50%);
-            background-color: #e8e8e8; color: #333;
-            padding: 20px 25px;
-            border: 3px solid #888; border-radius: 10px;
-            width: 90%;
-            max-width: 450px;
-            text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-            animation: modalFadeIn 0.4s ease-out forwards;
+            background-color: #fff;
+            color: #333;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            width: 80%;
+            max-width: 400px;
         }
-        .modal-content.special-effect {
-             animation: modalFadeIn 0.4s ease-out forwards, specialGlow 1.5s ease-in-out infinite alternate;
+
+        /* Свечение */
+        #resultContent.epic-glow {
+            box-shadow: 0 0 20px 5px #8e44ad;
+        }
+
+        #resultContent.mythic-glow {
+            box-shadow: 0 0 20px 5px #e74c3c;
+        }
+
+        #resultContent.legendary-glow {
+             animation: legendaryGlow 1.5s ease-in-out infinite alternate;
              border-width: 5px;
         }
-        /* Modal rarity borders */
-         .modal-content.common-win { border-color: #777; }
-         .modal-content.rare-win { border-color: #2980b9; }
-         .modal-content.epic-win { border-color: #8e44ad; }
-         .modal-content.legendary-win { border-color: #f39c12; }
+        @keyframes legendaryGlow {
+            0% { box-shadow: 0 0 15px 5px rgba(255, 223, 0, 0.5); }
+            50% { box-shadow: 0 0 30px 10px rgba(255, 223, 0, 0.8); }
+            100% { box-shadow: 0 0 15px 5px rgba(255, 223, 0, 0.5); }
+        }
 
-        .modal-content h2 {
-            margin-top: 0; margin-bottom: 15px;
+        #resultModal h2 {
+            margin-top: 0;
             font-size: 1.8em;
-            font-weight: bold;
-            word-break: break-word; /* Добавлено и сюда на всякий случай */
         }
-        .modal-instruction {
+
+        #resultModal p {
+            margin-bottom: 20px;
             font-size: 1em;
-            margin-bottom: 20px; color: #555;
         }
-        .modal-bot-button {
-            display: inline-block; background-color: #5865F2; color: #fff;
+
+        #resultModal a {
+            background-color: #5865F2;
+            color: #fff;
             padding: 10px 20px;
-            border-radius: 5px; text-decoration: none;
-            font-weight: bold; font-size: 1em;
-            transition: background-color 0.3s ease, transform 0.1s ease;
-        }
-        .modal-bot-button:hover { background-color: #4752C4; transform: scale(1.02); }
-         .modal-bot-button:active { transform: scale(0.98); }
-
-        .close-button {
-            color: #aaa; position: absolute; top: 5px; right: 10px;
-            font-size: 24px;
-            font-weight: bold; cursor: pointer; line-height: 1;
-        }
-        .close-button:hover, .close-button:focus { color: #333; }
-
-        /* --- Футер --- */
-        footer {
-            position: absolute; bottom: 0; left: 0; width: 100%;
-            text-align: center; padding: 10px 0;
-            color: rgba(255, 255, 255, 0.6); font-size: 13px;
-        }
-        /* Стиль для версии */
-        .footer-version {
-            display: block; /* Чтобы было на новой строке */
-            margin-top: 3px; /* Небольшой отступ сверху */
-            font-size: 0.8em; /* Меньший размер шрифта */
-            color: rgba(255, 255, 255, 0.4); /* Еще более бледный цвет */
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
         }
 
-        /* --- АДАПТИВНОСТЬ --- */
-        @media (max-width: 768px) {
-            body { padding: 15px; padding-bottom: 65px; }
-             h1 { font-size: 1.8em; margin-bottom: 20px; }
-            .case-wrapper { max-width: 90vw; margin-bottom: 20px; }
-            .case-container { height: 120px; }
-             .case-item { width: 120px; font-size: 18px; }
-              button#openCaseButton { font-size: 15px; padding: 10px 18px; }
-            .modal-content { max-width: 400px; padding: 15px 20px; }
-            .modal-content h2 { font-size: 1.6em; }
-            .modal-instruction { font-size: 0.95em; margin-bottom: 15px; }
-            .modal-bot-button { font-size: 0.95em; padding: 9px 18px; }
-            footer { font-size: 12px; padding: 8px 0;}
-        }
-        @media (max-width: 480px) {
-             body { padding: 10px; padding-bottom: 60px; }
-             h1 { font-size: 1.5em; margin-bottom: 15px; }
-             .case-wrapper { max-width: 95vw; margin-bottom: 15px; }
-             .case-container { height: 110px; }
-             .case-item { width: 100px; font-size: 15px; } /* Уменьшен размер текста */
-             button#openCaseButton { font-size: 14px; padding: 8px 15px; }
-              #instructions, #bot-link { font-size: 14px; }
-             .modal-content { width: 92%; max-width: 300px; padding: 15px; }
-             .modal-content h2 { font-size: 1.4em; margin-bottom: 10px;}
-             .modal-instruction { font-size: 0.9em; margin-bottom: 15px;}
-             .modal-bot-button { font-size: 0.9em; padding: 8px 15px; }
-             footer { font-size: 11px; padding: 6px 0;}
-             /* Можно добавить еще более мелкий шрифт для спец. итемов если 15px мало */
-             /* .case-item.rare, .case-item.epic, .case-item.legendary { font-size: 13px; } */
+        #resultModal a:hover {
+            background-color: #4752C4;
         }
 
-        /* --- Стили для соглашения --- */
-        .agreement-container {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            justify-content: center; /* Центрирование по горизонтали */
+        #closeButton {
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.5em;
+            color: #7f8c8d;
         }
 
-        #agreementCheckbox {
-            margin-right: 5px;
-        }
-
-        #agreementLabel {
+        #cooldownTimer {
             font-size: 14px;
-            color: #ddd;
-            user-select: none; /* Предотвращает выделение текста */
+            margin-top: 10px;
         }
 
-        #agreementLabel a {
+        #instructions {
+            font-size: 15px;
+            margin-bottom: 5px;
+        }
+
+        #troubleLink {
+            font-size: 15px;
+        }
+
+        #troubleLink a {
             color: #f1c40f;
             text-decoration: none;
             font-weight: bold;
         }
 
-        #agreementLabel a:hover {
-            text-decoration: underline;
-        }
-
-        /* Стили для подсказки */
-        button#openCaseButton[disabled]:hover::after {
-            content: 'Необходимо согласиться с Политикой конфиденциальности и Пользовательским соглашением';
+        footer {
             position: absolute;
-            bottom: -40px; /* Расположение подсказки */
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(0, 0, 0, 0.8);
-            color: #fff;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            white-space: nowrap;
-            z-index: 1; /* Чтобы подсказка была над другими элементами */
-        }
-
-        #agreementContainer.hidden {
-            display: none;
-        }
-
-        /* Стиль для таймера кулдауна */
-        #cooldownTimerDisplay {
-            font-size: 1.2em;
-            color: #f1c40f;
+            bottom: 0;
+            left: 0;
+            width: 100%;
             text-align: center;
-            margin-top: 10px;
+            padding: 10px 0;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 13px;
+        }
+
+        .footer-version {
+            display: block;
+            margin-top: 3px;
+            font-size: 0.8em;
+            color: rgba(255, 255, 255, 0.4);
         }
     </style>
 </head>
 <body>
 
-    <h1>Крути бесплатный кейс от MixVine Pr.</h1>
+    <h1>MixVine Рулетка Удачи</h1>
 
-    <div class="case-wrapper">
-        <div class="case-marker"></div>
-        <div class="case-container">
-             <div class="case-marker-line"></div>
-            <div class="case-items" id="caseItems">
-                <!-- Items will be added dynamically here -->
-            </div>
+    <div id="rouletteContainer">
+        <div id="rouletteWheel">
+            <div class="rouletteSlot"></div>
+            <div class="rouletteSlot"></div>
+            <div class="rouletteSlot"></div>
+            <div class="rouletteSlot"></div>
+            <div class="rouletteSlot"></div>
+            <div class="rouletteSlot"></div>
+            <div class="rouletteSlot"></div>
         </div>
+        <div id="rouletteArrow"></div>
     </div>
 
-    <!-- Контейнер для соглашения -->
-    <div class="agreement-container" id="agreementContainer">
-        <input type="checkbox" id="agreementCheckbox">
-        <label for="agreementCheckbox" id="agreementLabel">Я согласен с <a href="https://mixvineproject.github.io/politika" target="_blank">Политикой конфиденциальности</a> и <a href="https://mixvineproject.github.io/soglasie" target="_blank">Пользовательским соглашением</a></label>
-    </div>
+    <button id="spinButton" onclick="spinRoulette()">Крутить рулетку</button>
+    <div id="cooldownTimer"></div>
 
-    <button id="openCaseButton" onclick="openCase()" disabled>Открыть кейс</button>
+    <p id="instructions">Нажмите "Крутить рулетку", чтобы испытать удачу!</p>
+    <p id="troubleLink">Если вы столкнулись с проблемой, свяжитесь с ботом MixVine <a href="https://t.me/mixvinebot" target="_blank">MixVine</a></p>
 
-    <!-- Таймер кулдауна -->
-    <div id="cooldownTimerDisplay"></div>
-
-    <div id="result"></div>
-    <div id="instructions">Нажмите "Открыть кейс", чтобы испытать удачу!</div>
-    <div id="bot-link"><a href="https://t.me/mixvinebot" target="_blank">Связаться с ботом MixVine</a></div>
-
-    <!-- HTML Модального Окна (единое) -->
-    <div id="winModal" class="modal">
-        <div class="modal-content" id="winModalContent">
-            <span class="close-button" id="winModalCloseButton">&times;</span>
-            <h2 id="winItemTitle"></h2>
-            <p class="modal-instruction">Заскринь экран и скинь его телеграм боту</p>
-            <a href="https://t.me/mixvinebot" target="_blank" class="modal-bot-button">Перейти к боту</a>
+    <!-- Модальное окно результата -->
+    <div id="resultModal">
+        <div id="resultContent">
+            <span id="closeButton" onclick="closeModal()">&times;</span>
+            <h2 id="prizeName"></h2>
+            <p>Заскриньте и отправьте боту в Telegram.</p>
+            <a href="https://t.me/mixvinebot" target="_blank">Перейти к боту</a>
         </div>
     </div>
 
     <footer>
-        <span>© Project MIxVine 2024</span>
-        <span class="footer-version">ver. web2Global</span> <!-- Добавлена версия -->
+        <span>© Project MixVine 2024</span>
+        <span class="footer-version">ver. web3.1Global</span>
     </footer>
 
-
     <script>
-        // --- КОНФИГУРАЦИЯ ---
-        const config = {
-            items: [
-                { display: "Rare Number #1", rarity: "rare", special: true },
-                { display: "Epic Number #2", rarity: "epic", special: true },
-                { display: "Legendary Number #3", rarity: "legendary", special: true },
-                { display: "#1", rarity: "common" }, { display: "#2", rarity: "common" },
-                { display: "#3", rarity: "common" }, { display: "#4", rarity: "common" },
-                { display: "#5", rarity: "common" }, { display: "#6", rarity: "common" },
-                { display: "#7", rarity: "common" }, { display: "#8", rarity: "common" },
-                { display: "#9", rarity: "common" }, { display: "#10", rarity: "common" },
-                { display: "#11", rarity: "common" }, { display: "#12", rarity: "common" },
-                { display: "#13", rarity: "common" }, { display: "#14", rarity: "common" },
-                { display: "#15", rarity: "common" }, { display: "#16", rarity: "common" },
-                { display: "#17", rarity: "common" },
-                { display: "#18", rarity: "common" }, { display: "#19", rarity: "common" },
-                { display: "#20", rarity: "common" },
-            ],
-            numberOfDuplicates: 5,
-            spinDurationBase: 5,
-            spinsMultiplier: 0.5,
-            minSpins: 5,
-            maxSpins: 8,
-            cooldownTime: 1800 // 30 minutes in seconds
-        };
-        // --- КОНЕЦ КОНФИГУРАЦИИ ---
+        const spinButton = document.getElementById('spinButton');
+        const rouletteWheel = document.getElementById('rouletteWheel');
+        const resultModal = document.getElementById('resultModal');
+        const resultContent = document.getElementById('resultContent');
+        const prizeName = document.getElementById('prizeName');
+        const cooldownTimer = document.getElementById('cooldownTimer');
 
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-        }
-        shuffleArray(config.items);
+        const prizes = [
+            { name: 'Слабый приз', probability: 0.5, color: '#ecf0f1' },
+            { name: 'Обычный приз', probability: 0.4, color: '#95a5a6' },
+            { name: 'Необычный приз', probability: 0.3, color: '#3498db' },
+            { name: 'Редкий приз', probability: 0.25, color: '#2ecc71' },
+            { name: 'Эпический приз', probability: 0.2, color: '#9b59b6' },
+            { name: 'Мифический приз', probability: 0.1, color: '#e74c3c' },
+            { name: 'Легендарный приз! Поздравляем!', probability: 0.05, color: '#f1c40f' }
+        ];
 
-        const caseItemsContainer = document.getElementById('caseItems');
-        const openCaseButton = document.getElementById('openCaseButton');
-        const winModal = document.getElementById('winModal');
-        const winModalContent = document.getElementById('winModalContent');
-        const winItemTitle = document.getElementById('winItemTitle');
-        const winModalCloseButton = document.getElementById('winModalCloseButton');
-        const agreementCheckbox = document.getElementById('agreementCheckbox');
-        const agreementContainer = document.getElementById('agreementContainer');
-        const cooldownTimerDisplay = document.getElementById('cooldownTimerDisplay');
+        let spinning = false;
 
-        const numUniqueItems = config.items.length;
+        // Функция для запуска рулетки
+        function spinRoulette() {
+            if (spinning) return;
 
-        let isSpinning = false;
-        let itemWidth = 0; // Will be calculated
-        let itemsGenerated = false;
-        let nextAvailableTime = null;
+            spinning = true;
+            spinButton.disabled = true;
+            spinButton.textContent = 'Крутится...';
 
-        // Function to create item elements and calculate width
-        function setupItems() {
-            caseItemsContainer.innerHTML = ''; // Clear first
-            const fragment = document.createDocumentFragment();
-            const itemsToRender = [];
+            const prize = determinePrize();
+            const rotation = 360 * 10 + getRotationOffset(prize); // Крутим на 10 оборотов
 
-            for (let d = 0; d <= config.numberOfDuplicates; d++) {
-                itemsToRender.push(...config.items);
-            }
+            rouletteWheel.style.transition = 'transform 5s cubic-bezier(0.1, 0.6, 0.1, 1)'; // Более плавная анимация
+            rouletteWheel.style.transform = `rotate(${rotation}deg)`;
 
-            // Determine item width from CSS for the current screen size
-            let tempItemDiv = document.createElement('div');
-            tempItemDiv.classList.add('case-item');
-            tempItemDiv.style.visibility = 'hidden';
-            caseItemsContainer.appendChild(tempItemDiv);
-            itemWidth = tempItemDiv.offsetWidth;
-            caseItemsContainer.removeChild(tempItemDiv);
-
-            console.log("Item width calculated:", itemWidth);
-
-            if (itemWidth === 0) {
-                console.error("Could not determine item width! Using fallback.");
-                // Пытаемся получить ширину из CSS переменной или задать значение по умолчанию
-                const fallbackWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--case-item-width-fallback') || '100');
-                itemWidth = fallbackWidth;
-                console.warn("Using fallback width:", itemWidth);
-            }
-
-
-            // Now create the actual items
-            itemsToRender.forEach(itemData => {
-                let itemDiv = document.createElement('div');
-                itemDiv.classList.add('case-item');
-                // itemDiv.style.width = `${itemWidth}px`; // Optional
-
-                if (itemData.rarity) {
-                    itemDiv.classList.add(itemData.rarity);
-                }
-                itemDiv.textContent = itemData.display;
-                fragment.appendChild(itemDiv);
-            });
-
-            caseItemsContainer.appendChild(fragment);
-            itemsGenerated = true;
-        }
-
-
-        // --- Показ модального окна ---
-        function showWinModal(item) {
-            winItemTitle.textContent = item.display;
-            winItemTitle.style.color = getRarityColorHex(item.rarity);
-
-            winModalContent.className = 'modal-content';
-            winModalContent.classList.add(item.rarity + '-win');
-
-            if (item.special) {
-                winModalContent.classList.add('special-effect');
-                console.log("Special win effect added for:", item.display);
-            }
-
-            winModal.style.display = "block";
-        }
-
-        // --- Закрытие модального окна ---
-        winModalCloseButton.onclick = function() {
-            winModal.style.display = "none";
-        }
-        window.onclick = function(event) {
-            if (event.target == winModal) {
-                winModal.style.display = "none";
-            }
-        }
-
-        // --- MAIN SPIN FUNCTION ---
-        function openCase() {
-            if (itemWidth === 0 && itemsGenerated) {
-                 let currentItemWidth = caseItemsContainer.children.length > 0 ? caseItemsContainer.children[0].offsetWidth : 0;
-                 if (currentItemWidth > 0) {
-                     itemWidth = currentItemWidth;
-                     console.log("Item width re-calculated:", itemWidth);
-                 }
-            }
-
-            if (isSpinning || !itemsGenerated || itemWidth === 0 || nextAvailableTime > Date.now()) {
-                console.warn("Spin prevented: Conditions not met.", {isSpinning, itemsGenerated, itemWidth, nextAvailableTime});
-                return;
-            }
-
-            isSpinning = true;
-            openCaseButton.disabled = true;
-            openCaseButton.textContent = "Крутится...";
-            agreementContainer.classList.add("hidden");
-
-            const winningIndexInUniqueSet = Math.floor(Math.random() * numUniqueItems);
-            const winningItem = config.items[winningIndexInUniqueSet];
-            console.log(`Winning item: #${winningIndexInUniqueSet + 1}`, winningItem);
-
-            let targetItemIndex = -1;
-            const startIndexToSearch = Math.floor(config.numberOfDuplicates / 2) * numUniqueItems;
-            const allRenderedItems = Array.from(caseItemsContainer.children);
-
-            for(let i = startIndexToSearch; i < allRenderedItems.length; i++) {
-                 const renderedItemText = allRenderedItems[i].textContent;
-                 const hasCorrectRarityClass = winningItem.rarity ? allRenderedItems[i].classList.contains(winningItem.rarity) : true;
-                if (renderedItemText === winningItem.display && hasCorrectRarityClass) {
-                    targetItemIndex = i;
-                    break;
-                }
-            }
-             if (targetItemIndex === -1) {
-                console.warn("Could not find exact winning item in duplicates, using original index logic.");
-                targetItemIndex = (config.numberOfDuplicates - 1) * numUniqueItems + winningIndexInUniqueSet;
-             }
-
-            const containerWidth = caseItemsContainer.parentElement.offsetWidth;
-            const centerOffset = (containerWidth / 2) - (itemWidth / 2);
-            let totalOffset = (targetItemIndex * itemWidth) - centerOffset;
-            const jitter = (Math.random() - 0.5) * (itemWidth * 0.1);
-            totalOffset += jitter;
-
-            const numSpins = config.minSpins + Math.floor(Math.random() * (config.maxSpins - config.minSpins + 1));
-            const duration = config.spinDurationBase + numSpins * config.spinsMultiplier;
-            console.log(`Calculated Spins: ${numSpins}, Duration: ${duration.toFixed(2)}s, Target Index: ${targetItemIndex}, Offset: ${totalOffset}`);
-
-            caseItemsContainer.style.transition = `transform ${duration}s cubic-bezier(0.15, 0.8, 0.15, 1)`;
-            caseItemsContainer.style.transform = `translateX(-${totalOffset}px)`;
-
-            // --- Handle Spin End ---
             setTimeout(() => {
-                isSpinning = false;
-                openCaseButton.textContent = "Кейс открыт!";
-                showWinModal(winningItem);
-                startCooldown();
-                console.log("Spin finished.");
-            }, duration * 1000);
+                spinning = false;
+                spinButton.textContent = 'Крутить рулетку';
+                spinButton.disabled = false; // Разблокируем кнопку
+                showResultModal(prize);
+
+            }, 5000);
         }
 
-        // Helper to get HEX color based on rarity
-        function getRarityColorHex(rarity) {
-            switch (rarity) {
-                case 'common': return '#aaaaaa';
-                case 'uncommon': return '#88cc88';
-                case 'rare': return '#5dade2';
-                case 'epic': return '#af7ac5';
-                case 'legendary': return '#f39c12';
-                default: return '#333333';
-            }
-        }
+        // Функция определения выигрышного приза на основе вероятностей
+        function determinePrize() {
+            const randomNumber = Math.random();
+            let cumulativeProbability = 0;
 
-        // --- COOLDOWN FUNCTIONS ---
-        function startCooldown() {
-            nextAvailableTime = Date.now() + config.cooldownTime * 1000;
-            localStorage.setItem('nextAvailableTime', nextAvailableTime);
-            openCaseButton.disabled = true;
-            openCaseButton.textContent = "Кейс открыт! Подождите...";
-            updateCooldownTimer();
-        }
-
-        function checkCooldown() {
-            const storedTime = localStorage.getItem('nextAvailableTime');
-            if (storedTime) {
-                nextAvailableTime = parseInt(storedTime, 10);
-                if (nextAvailableTime > Date.now()) {
-                    openCaseButton.disabled = true;
-                     openCaseButton.textContent = "Кейс открыт! Подождите...";
-                    updateCooldownTimer();
-                } else {
-                    resetButtonState();
+            for (const prize of prizes) {
+                cumulativeProbability += prize.probability;
+                if (randomNumber <= cumulativeProbability) {
+                    return prize;
                 }
             }
+            return prizes[0]; // На всякий случай
         }
 
+        // Функция для получения смещения вращения для выигрышного приза
+        function getRotationOffset(prize) {
+            const prizeIndex = prizes.indexOf(prize);
+            const slotAngle = 360 / prizes.length;
+            const halfSlotAngle = slotAngle / 2;
+             return  (prizeIndex * slotAngle );
+          //  return 360 - (prizeIndex * slotAngle + halfSlotAngle);
+        }
 
-        function updateCooldownTimer() {
-            const timeLeft = nextAvailableTime - Date.now();
-            if (timeLeft > 0) {
-                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-                cooldownTimerDisplay.textContent = `Следующий кейс будет доступен через: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                setTimeout(updateCooldownTimer, 1000); // Update every second
-            } else {
-                resetButtonState();
+        // Функция отображения модального окна с результатом
+        function showResultModal(prize) {
+            prizeName.textContent = prize.name;
+            resultContent.className = ''; // Сбросить все классы
+            resultContent.classList.add('glow');
+            if (prize.name.includes('Эпический')) {
+                resultContent.classList.add('epic-glow');
+            } else if (prize.name.includes('Мифический')) {
+                resultContent.classList.add('mythic-glow');
+            } else if (prize.name.includes('Легендарный')) {
+                resultContent.classList.add('legendary-glow');
             }
+            resultModal.style.display = 'block';
         }
 
-        function resetButtonState() {
-            nextAvailableTime = null;
-            localStorage.removeItem('nextAvailableTime');
-            openCaseButton.disabled = !agreementCheckbox.checked;
-            openCaseButton.textContent = "Открыть кейс";
-            cooldownTimerDisplay.textContent = ""; // Clear the timer display
+        // Функция закрытия модального окна
+        function closeModal() {
+            resultModal.style.display = 'none';
         }
-
-
-        // --- Initialize ---
-        setupItems();
-        checkCooldown();
-
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-             clearTimeout(resizeTimeout);
-             resizeTimeout = setTimeout(() => {
-                 console.log("Window resized, recalculating item width...");
-                 if (caseItemsContainer.children.length > 0 && !isSpinning) {
-                    // Re-measure item width after styles might have changed
-                    let currentItemWidth = caseItemsContainer.children[0].offsetWidth;
-                     if (currentItemWidth > 0) {
-                        itemWidth = currentItemWidth;
-                        console.log("Item width recalculated on resize:", itemWidth);
-                     } else {
-                         console.warn("Could not measure item width on resize.");
-                     }
-                 } else if (!itemsGenerated) {
-                     setupItems();
-                 }
-             }, 250);
-         });
-
-        // Обработчик изменения состояния чекбокса
-        agreementCheckbox.addEventListener('change', function() {
-            openCaseButton.disabled = !this.checked;
-             if (!this.checked) {
-                 openCaseButton.textContent = "Открыть кейс"; // Возвращаем текст кнопки
-             } else if (nextAvailableTime > Date.now()){
-                  openCaseButton.disabled = true; // Если кулдаун, то блокируем
-             }
-        });
-
-        // Сразу после загрузки скрипта проверяем, было ли согласие сохранено в localStorage
-        window.addEventListener('load', () => {
-             if (nextAvailableTime > Date.now()) {
-                  openCaseButton.disabled = true; // Если кулдаун, то блокируем
-                   updateCooldownTimer();
-             } else {
-                  openCaseButton.disabled = !agreementCheckbox.checked;
-             }
-         });
 
     </script>
 
