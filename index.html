@@ -175,6 +175,10 @@
             min-height: 200px; /* Увеличена высота */
             text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.4);
             animation: modalFadeIn 0.4s ease-out forwards;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Выравнивание по вертикали */
+            align-items: center; /* Выравнивание по горизонтали */
         }
         .modal-content.special-effect {
              animation: modalFadeIn 0.4s ease-out forwards, specialGlow 1.5s ease-in-out infinite alternate;
@@ -190,114 +194,16 @@
 
 
         .modal-content h2 {
-            margin-top: 0; margin-bottom: 15px;
+            margin-top: 0; margin-bottom: 5px; /* Сокращаем отступ */
             font-size: 1.8em;
             font-weight: bold;
             word-break: break-word; /* Добавлено и сюда на всякий случай */
+            text-align: center;
         }
         .modal-instruction {
             font-size: 1em;
             margin-bottom: 20px; color: #555;
         }
-        .modal-bot-button {
-            display: inline-block; background-color: #5865F2; color: #fff;
-            padding: 10px 20px;
-            border-radius: 5px; text-decoration: none;
-            font-weight: bold; font-size: 1em;
-            transition: background-color 0.3s ease, transform 0.1s ease;
-        }
-        .modal-bot-button:hover { background-color: #4752C4; transform: scale(1.02); }
-         .modal-bot-button:active { transform: scale(0.98); }
-
-        .close-button {
-            color: #aaa; position: absolute; top: 5px; right: 10px;
-            font-size: 24px;
-            font-weight: bold; cursor: pointer; line-height: 1;
-        }
-        .close-button:hover, .close-button:focus { color: #333; }
-
-        /* --- Футер --- */
-        footer {
-            position: absolute; bottom: 0; left: 0; width: 100%;
-            text-align: center; padding: 10px 0;
-            color: rgba(255, 255, 255, 0.6); font-size: 13px;
-        }
-        /* Стиль для версии */
-        .footer-version {
-            display: block; /* Чтобы было на новой строке */
-            margin-top: 3px; /* Небольшой отступ сверху */
-            font-size: 0.8em; /* Меньший размер шрифта */
-            color: rgba(255, 255, 255, 0.4); /* Еще более бледный цвет */
-        }
-
-        /* --- АДАПТИВНОСТЬ --- */
-        @media (max-width: 768px) {
-            body { padding: 15px; padding-bottom: 65px; }
-             h1 { font-size: 1.8em; margin-bottom: 20px; }
-            .case-wrapper { max-width: 90vw; margin-bottom: 20px; }
-            .case-container { height: 120px; }
-             .case-item { width: 120px; font-size: 18px; }
-              button#openCaseButton { font-size: 15px; padding: 10px 18px; }
-            .modal-content { max-width: 400px; padding: 15px 20px; }
-            .modal-content h2 { font-size: 1.6em; }
-            .modal-instruction { font-size: 0.95em; margin-bottom: 15px; }
-            .modal-bot-button { font-size: 0.95em; padding: 9px 18px; }
-            footer { font-size: 12px; padding: 8px 0;}
-        }
-        @media (max-width: 480px) {
-             body { padding: 10px; padding-bottom: 60px; }
-             h1 { font-size: 1.5em; margin-bottom: 15px; }
-             .case-wrapper { max-width: 95vw; margin-bottom: 15px; }
-             .case-container { height: 110px; }
-             .case-item { width: 100px; font-size: 15px; } /* Уменьшен размер текста */
-             button#openCaseButton { font-size: 14px; padding: 8px 15px; }
-              #instructions, #bot-link { font-size: 14px; }
-             .modal-content { width: 92%; max-width: 300px; padding: 15px; }
-             .modal-content h2 { font-size: 1.4em; margin-bottom: 10px;}
-             .modal-instruction { font-size: 0.9em; margin-bottom: 15px;}
-             .modal-bot-button { font-size: 0.9em; padding: 8px 15px; }
-             footer { font-size: 11px; padding: 6px 0;}
-             /* Можно добавить еще более мелкий шрифт для спец. итемов если 15px мало */
-             /* .case-item.rare, .case-item.epic, .case-item.legendary { font-size: 13px; } */
-        }
-
-        /* --- Стили для соглашения --- */
-        .agreement-container {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            justify-content: center; /* Центрирование по горизонтали */
-        }
-
-        #agreementCheckbox {
-            margin-right: 5px;
-        }
-
-        #agreementLabel {
-            font-size: 14px;
-            color: #ddd;
-            user-select: none; /* Предотвращает выделение текста */
-        }
-
-        #agreementLabel a {
-            color: #f1c40f;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        #agreementLabel a:hover {
-            text-decoration: underline;
-        }
-
-        /* Стили для подсказки */
-        button#openCaseButton[disabled]:hover::after {
-            content: none; /* Убираем текст при наведении */
-        }
-
-        #agreementContainer.hidden {
-            display: none;
-        }
-
     </style>
 </head>
 <body>
@@ -331,7 +237,7 @@
         <div class="modal-content" id="winModalContent">
             <span class="close-button" id="winModalCloseButton">&times;</span>
             <h2 id="winItemTitle"></h2>
-            <p id="winItemRarity"></p> <!-- Место для отображения редкости -->
+            <p id="winItemRarity"></p>
         </div>
     </div>
 
@@ -395,7 +301,6 @@
         let isSpinning = false;
         let itemWidth = 0; // Will be calculated
         let itemsGenerated = false;
-        let spinDirection = 1; // 1 - вправо, -1 - влево
 
         // Function to create item elements and calculate width
         function setupItems() {
@@ -448,6 +353,7 @@
         function showWinModal(item) {
             winItemTitle.textContent = item.display;
             winItemTitle.style.color = getRarityColorHex(item.rarity);
+            winItemTitle.style.textAlign = "center";
 
             winModalContent.className = 'modal-content';
             winModalContent.classList.add(item.rarity + '-win');
@@ -458,8 +364,11 @@
             }
 
             // Добавляем отображение редкости
-            winItemRarity.textContent = `Rare: ${item.rarity}`; // Выводим редкость
+            winItemRarity.textContent = `Редкость: ${item.rarity}`; // Выводим редкость
             winItemRarity.style.color = "#555";
+            winItemRarity.style.textAlign = "center";
+            winItemRarity.style.marginBottom = "0";
+
 
             winModal.style.display = "block";
         }
@@ -525,13 +434,8 @@
             const duration = config.spinDurationBase + numSpins * config.spinsMultiplier;
             console.log(`Calculated Spins: ${numSpins}, Duration: ${duration.toFixed(2)}s, Target Index: ${targetItemIndex}, Offset: ${totalOffset}`);
 
-            // Изменяем направление вращения
-            const translateXValue = spinDirection * totalOffset;
             caseItemsContainer.style.transition = `transform ${duration}s cubic-bezier(0.15, 0.8, 0.15, 1)`;
-            caseItemsContainer.style.transform = `translateX(-${translateXValue}px)`;
-
-            // Инвертируем направление для следующего спина
-            spinDirection *= -1;
+            caseItemsContainer.style.transform = `translateX(-${totalOffset}px)`;
 
             // --- Handle Spin End ---
             setTimeout(() => {
