@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MixVine Free Case</title>
+    <title>Кейс от MixVine</title> <!-- Изменено название сайта -->
     <style>
         /* Анимация для фона (Фиолетовый <-> Темно-желтый) */
         @keyframes purpleGoldGradientShift {
@@ -23,6 +23,18 @@
             0% { box-shadow: 0 0 15px 5px rgba(255, 223, 0, 0.5); }
             50% { box-shadow: 0 0 30px 10px rgba(255, 223, 0, 0.8); }
             100% { box-shadow: 0 0 15px 5px rgba(255, 223, 0, 0.5); }
+        }
+
+        /* Анимация для радужного свечения */
+        @keyframes rainbowGlow {
+            0% { box-shadow: 0 0 15px 5px rgba(255, 0, 0, 0.5); } /* Красный */
+            14% { box-shadow: 0 0 15px 5px rgba(255, 165, 0, 0.5); } /* Оранжевый */
+            28% { box-shadow: 0 0 15px 5px rgba(255, 255, 0, 0.5); } /* Желтый */
+            42% { box-shadow: 0 0 15px 5px rgba(0, 255, 0, 0.5); } /* Зеленый */
+            57% { box-shadow: 0 0 15px 5px rgba(0, 0, 255, 0.5); } /* Синий */
+            71% { box-shadow: 0 0 15px 5px rgba(75, 0, 130, 0.5); } /* Индиго */
+            85% { box-shadow: 0 0 15px 5px rgba(148, 0, 211, 0.5); } /* Фиолетовый */
+            100% { box-shadow: 0 0 15px 5px rgba(255, 0, 0, 0.5); } /* Красный */
         }
 
 
@@ -110,6 +122,13 @@
             color: #333; font-weight: bold;
         }
 
+        .case-item.mythic { background-color: #e74c3c; color: #fff; } /* Красный */
+        .case-item.fantastic {
+            background-color: #9b59b6; /* Замените на подходящий цвет */
+            color: #fff;
+            animation: rainbowGlow 3s linear infinite;
+        }
+
         button#openCaseButton {
             background-color: #c89600; color: #333;
             padding: 10px 20px;
@@ -166,6 +185,9 @@
          .modal-content.rare-win { border-color: #2980b9; }
          .modal-content.epic-win { border-color: #8e44ad; }
          .modal-content.legendary-win { border-color: #f39c12; }
+        .modal-content.mythic-win { border-color: #e74c3c; }
+        .modal-content.fantastic-win { border-color: #9b59b6; }
+
 
         .modal-content h2 {
             margin-top: 0; margin-bottom: 15px;
@@ -287,18 +309,11 @@
             display: none;
         }
 
-        /* Стиль для таймера кулдауна */
-        #cooldownTimerDisplay {
-            font-size: 1.2em;
-            color: #f1c40f;
-            text-align: center;
-            margin-top: 10px;
-        }
     </style>
 </head>
 <body>
 
-    <h1>Крути бесплатный кейс от MixVine Pr.</h1>
+    <h1>Испытай удачу, открой кейс!</h1> <!-- Изменено название страницы -->
 
     <div class="case-wrapper">
         <div class="case-marker"></div>
@@ -318,9 +333,6 @@
 
     <button id="openCaseButton" onclick="openCase()" disabled>Открыть кейс</button>
 
-    <!-- Таймер кулдауна -->
-    <div id="cooldownTimerDisplay"></div>
-
     <div id="result"></div>
     <div id="instructions">Нажмите "Открыть кейс", чтобы испытать удачу!</div>
     <div id="bot-link"><a href="https://t.me/mixvinebot" target="_blank">Связаться с ботом MixVine</a></div>
@@ -330,7 +342,7 @@
         <div class="modal-content" id="winModalContent">
             <span class="close-button" id="winModalCloseButton">&times;</span>
             <h2 id="winItemTitle"></h2>
-            <p class="modal-instruction">Заскринь экран и скинь его телеграм боту</p>
+            <!-- Текст убран -->
             <a href="https://t.me/mixvinebot" target="_blank" class="modal-bot-button">Перейти к боту</a>
         </div>
     </div>
@@ -350,6 +362,8 @@
                 { display: "Rare Number #1", rarity: "rare", special: true },
                 { display: "Epic Number #2", rarity: "epic", special: true },
                 { display: "Legendary Number #3", rarity: "legendary", special: true },
+                { display: "Mythic Number #4", rarity: "mythic", special: true }, // Добавлен Mythic
+                { display: "Fantastic Number #5", rarity: "fantastic", special: true }, // Добавлен Fantastic
                 { display: "#1", rarity: "common" }, { display: "#2", rarity: "common" },
                 { display: "#3", rarity: "common" }, { display: "#4", rarity: "common" },
                 { display: "#5", rarity: "common" }, { display: "#6", rarity: "common" },
@@ -366,8 +380,7 @@
             spinDurationBase: 5,
             spinsMultiplier: 0.5,
             minSpins: 5,
-            maxSpins: 8,
-            cooldownTime: 1800 // 30 minutes in seconds
+            maxSpins: 8
         };
         // --- КОНЕЦ КОНФИГУРАЦИИ ---
 
@@ -387,14 +400,12 @@
         const winModalCloseButton = document.getElementById('winModalCloseButton');
         const agreementCheckbox = document.getElementById('agreementCheckbox');
         const agreementContainer = document.getElementById('agreementContainer');
-        const cooldownTimerDisplay = document.getElementById('cooldownTimerDisplay');
 
         const numUniqueItems = config.items.length;
 
         let isSpinning = false;
         let itemWidth = 0; // Will be calculated
         let itemsGenerated = false;
-        let nextAvailableTime = null;
 
         // Function to create item elements and calculate width
         function setupItems() {
@@ -479,8 +490,8 @@
                  }
             }
 
-            if (isSpinning || !itemsGenerated || itemWidth === 0 || nextAvailableTime > Date.now()) {
-                console.warn("Spin prevented: Conditions not met.", {isSpinning, itemsGenerated, itemWidth, nextAvailableTime});
+            if (isSpinning || !itemsGenerated || itemWidth === 0) {
+                console.warn("Spin prevented: Conditions not met.", {isSpinning, itemsGenerated, itemWidth});
                 return;
             }
 
@@ -526,9 +537,9 @@
             // --- Handle Spin End ---
             setTimeout(() => {
                 isSpinning = false;
-                openCaseButton.textContent = "Кейс открыт!";
+                openCaseButton.textContent = "Открыть кейс!";
                 showWinModal(winningItem);
-                startCooldown();
+                resetButtonState();
                 console.log("Spin finished.");
             }, duration * 1000);
         }
@@ -541,58 +552,19 @@
                 case 'rare': return '#5dade2';
                 case 'epic': return '#af7ac5';
                 case 'legendary': return '#f39c12';
+                case 'mythic': return '#e74c3c'; // Красный
+                case 'fantastic': return '#9b59b6'; // Цвет fantastic, можно заменить
                 default: return '#333333';
             }
         }
 
-        // --- COOLDOWN FUNCTIONS ---
-        function startCooldown() {
-            nextAvailableTime = Date.now() + config.cooldownTime * 1000;
-            localStorage.setItem('nextAvailableTime', nextAvailableTime);
-            openCaseButton.disabled = true;
-            openCaseButton.textContent = "Кейс открыт! Подождите...";
-            updateCooldownTimer();
-        }
-
-        function checkCooldown() {
-            const storedTime = localStorage.getItem('nextAvailableTime');
-            if (storedTime) {
-                nextAvailableTime = parseInt(storedTime, 10);
-                if (nextAvailableTime > Date.now()) {
-                    openCaseButton.disabled = true;
-                     openCaseButton.textContent = "Кейс открыт! Подождите...";
-                    updateCooldownTimer();
-                } else {
-                    resetButtonState();
-                }
-            }
-        }
-
-
-        function updateCooldownTimer() {
-            const timeLeft = nextAvailableTime - Date.now();
-            if (timeLeft > 0) {
-                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-                cooldownTimerDisplay.textContent = `Следующий кейс будет доступен через: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                setTimeout(updateCooldownTimer, 1000); // Update every second
-            } else {
-                resetButtonState();
-            }
-        }
-
         function resetButtonState() {
-            nextAvailableTime = null;
-            localStorage.removeItem('nextAvailableTime');
             openCaseButton.disabled = !agreementCheckbox.checked;
             openCaseButton.textContent = "Открыть кейс";
-            cooldownTimerDisplay.textContent = ""; // Clear the timer display
         }
-
 
         // --- Initialize ---
         setupItems();
-        checkCooldown();
 
         let resizeTimeout;
         window.addEventListener('resize', () => {
@@ -619,19 +591,12 @@
             openCaseButton.disabled = !this.checked;
              if (!this.checked) {
                  openCaseButton.textContent = "Открыть кейс"; // Возвращаем текст кнопки
-             } else if (nextAvailableTime > Date.now()){
-                  openCaseButton.disabled = true; // Если кулдаун, то блокируем
              }
         });
 
         // Сразу после загрузки скрипта проверяем, было ли согласие сохранено в localStorage
         window.addEventListener('load', () => {
-             if (nextAvailableTime > Date.now()) {
-                  openCaseButton.disabled = true; // Если кулдаун, то блокируем
-                   updateCooldownTimer();
-             } else {
-                  openCaseButton.disabled = !agreementCheckbox.checked;
-             }
+             openCaseButton.disabled = !agreementCheckbox.checked;
          });
 
     </script>
