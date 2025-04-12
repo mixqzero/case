@@ -446,10 +446,9 @@
             openCaseButton.disabled = true;
             openCaseButton.textContent = "Кейс открыт, для повторного открытия перезагрузите страницу";
 
-            // Uncheck the agreement checkbox
-            agreementCheckbox.checked = false;
+            // Remove the agreement elements
+            agreementContainer.style.display = 'none';
 
-            agreementContainer.classList.add("hidden");
 
             const winningIndexInUniqueSet = Math.floor(Math.random() * numUniqueItems);
             const winningItem = config.items[winningIndexInUniqueSet];
