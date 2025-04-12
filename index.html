@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Кейс от MixVine</title> <!-- Изменено название сайта -->
+    <title>Кейс от MixVine</title>
     <style>
         /* Анимация для фона (Фиолетовый <-> Темно-желтый) */
         @keyframes purpleGoldGradientShift {
@@ -137,7 +137,6 @@
             font-weight: bold; margin-bottom: 15px;
             transition: background-color 0.3s ease, transform 0.1s ease;
             text-shadow: 1px 1px 2px rgba(255,255,255,0.4);
-            position: relative; /* Для позиционирования подсказки */
         }
         button#openCaseButton:hover:not(:disabled) { background-color: #b48a00; }
         button#openCaseButton:active:not(:disabled) { transform: scale(0.98); }
@@ -173,6 +172,7 @@
             border: 3px solid #888; border-radius: 10px;
             width: 90%;
             max-width: 450px;
+            min-height: 200px; /* Увеличена высота */
             text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.4);
             animation: modalFadeIn 0.4s ease-out forwards;
         }
@@ -291,18 +291,7 @@
 
         /* Стили для подсказки */
         button#openCaseButton[disabled]:hover::after {
-            content: 'Необходимо согласиться с Политикой конфиденциальности и Пользовательским соглашением';
-            position: absolute;
-            bottom: -40px; /* Расположение подсказки */
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(0, 0, 0, 0.8);
-            color: #fff;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            white-space: nowrap;
-            z-index: 1; /* Чтобы подсказка была над другими элементами */
+            content: none; /* Убираем текст при наведении */
         }
 
         #agreementContainer.hidden {
@@ -313,7 +302,7 @@
 </head>
 <body>
 
-    <h1>Испытай удачу, открой кейс!</h1> <!-- Изменено название страницы -->
+    <h1>Испытай удачу, открой кейс!</h1>
 
     <div class="case-wrapper">
         <div class="case-marker"></div>
@@ -342,8 +331,7 @@
         <div class="modal-content" id="winModalContent">
             <span class="close-button" id="winModalCloseButton">&times;</span>
             <h2 id="winItemTitle"></h2>
-            <!-- Текст убран -->
-            <a href="https://t.me/mixvinebot" target="_blank" class="modal-bot-button">Перейти к боту</a>
+            <p id="winItemRarity"></p> <!-- Место для отображения редкости -->
         </div>
     </div>
 
@@ -397,6 +385,7 @@
         const winModal = document.getElementById('winModal');
         const winModalContent = document.getElementById('winModalContent');
         const winItemTitle = document.getElementById('winItemTitle');
+        const winItemRarity = document.getElementById('winItemRarity'); // Получаем элемент для отображения редкости
         const winModalCloseButton = document.getElementById('winModalCloseButton');
         const agreementCheckbox = document.getElementById('agreementCheckbox');
         const agreementContainer = document.getElementById('agreementContainer');
@@ -406,6 +395,7 @@
         let isSpinning = false;
         let itemWidth = 0; // Will be calculated
         let itemsGenerated = false;
+        let spinDirection = 1; // 1 - вправо, -1 - влево
 
         // Function to create item elements and calculate width
         function setupItems() {
@@ -466,6 +456,10 @@
                 winModalContent.classList.add('special-effect');
                 console.log("Special win effect added for:", item.display);
             }
+
+            // Добавляем отображение редкости
+            winItemRarity.textContent = `Rare: ${item.rarity}`; // Выводим редкость
+            winItemRarity.style.color = "#555";
 
             winModal.style.display = "block";
         }
@@ -531,8 +525,13 @@
             const duration = config.spinDurationBase + numSpins * config.spinsMultiplier;
             console.log(`Calculated Spins: ${numSpins}, Duration: ${duration.toFixed(2)}s, Target Index: ${targetItemIndex}, Offset: ${totalOffset}`);
 
+            // Изменяем направление вращения
+            const translateXValue = spinDirection * totalOffset;
             caseItemsContainer.style.transition = `transform ${duration}s cubic-bezier(0.15, 0.8, 0.15, 1)`;
-            caseItemsContainer.style.transform = `translateX(-${totalOffset}px)`;
+            caseItemsContainer.style.transform = `translateX(-${translateXValue}px)`;
+
+            // Инвертируем направление для следующего спина
+            spinDirection *= -1;
 
             // --- Handle Spin End ---
             setTimeout(() => {
